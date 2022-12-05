@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/docker/usr/local/etc/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - ./backend:/data
+      - php-fpm-sock:/var/run/php-fpm
+      - backend-vendor:/data/vendor
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/etc/nginx/templates:/etc/nginx/templates
+      - php-fpm-sock:/var/run/php-fpm
+    ports:
+      - 8082:80
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  backend-vendor:
+  php-fpm-sock:
